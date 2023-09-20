@@ -3,6 +3,7 @@ package com.cst438.domain;
 import java.util.List;
 import java.util.ArrayList;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -15,6 +16,7 @@ public class Course {
 	private int course_id;
 	private String title;
 	private String instructor;
+	@Column(name="year1")
 	private int year;
 	private String semester;
 	

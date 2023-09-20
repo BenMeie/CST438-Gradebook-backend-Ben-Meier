@@ -3,7 +3,7 @@ CREATE TABLE course (
   instructor varchar(255) DEFAULT NULL,
   semester varchar(255) DEFAULT NULL,
   title varchar(255) DEFAULT NULL,
-  year int NOT NULL,
+  year1 int NOT NULL,
   PRIMARY KEY (course_id)
 );
 
