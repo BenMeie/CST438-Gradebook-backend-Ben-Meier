@@ -11,14 +11,18 @@ INSERT INTO course (year1, semester, course_id, title, instructor)  VALUES
 
 insert into assignment (id, due_date, name, course_id) values 
 (1, '2021-09-01', 'db design', 31045),
-(2, '2021-09-02', 'requirements', 31045)
+(2, '2021-09-02', 'requirements', 31045),
+(3, '2023-11-05', 'Homework 1', 40443),
+(4, '2023-11-15', 'Homework 2', 40443),
 ;
 
 insert into enrollment (id, student_email, student_name, course_id)  values
 (1, 'test@csumb.edu', 'test', 31045),
 (2, 'dwisneski@csumb.edu', 'david', 31045),
 (3, 'trebold@csumb.edu', 'tom', 31045),
-(4, 'test4@csumb.edu', 'test4', 31045)
+(4, 'test4@csumb.edu', 'test4', 31045),
+(5, 'tom@csumb.edu', 'tom', 40443),
+(6, 'test@csumb.edu', 'test', 40443)
 ; 
 
 insert into assignment_grade (score, assignment_id, enrollment_id) values 
@@ -27,5 +31,9 @@ insert into assignment_grade (score, assignment_id, enrollment_id) values
 (92, 1, 3), 
 (93, 2, 1), 
 (94, 2, 2), 
-(95, 2, 3)
+(95, 2, 3),
+(50, 3, 5),
+(100, 3, 6),
+(76, 4, 5),
+(91, 4, 6)
 ;
