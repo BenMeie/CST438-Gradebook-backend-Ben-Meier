@@ -12,6 +12,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import com.cst438.domain.AssignmentDTO;
 import com.cst438.domain.AssignmentGrade;
 import com.cst438.domain.AssignmentGradeRepository;
 import com.cst438.domain.GradeDTO;
@@ -115,6 +116,85 @@ public class JunitTestGradebook {
 		assertEquals(88, ag.getScore());
 
 
+	}
+	
+	@Test
+	public void findAssignmentById() throws Exception {
+		MockHttpServletResponse response;
+		
+		response = mvc.perform(MockMvcRequestBuilders.get("/assignment/1").accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+		
+		assertEquals(200, response.getStatus());
+		
+		AssignmentDTO ass = fromJsonString(response.getContentAsString(), AssignmentDTO.class);
+		assertEquals("db design", ass.assignmentName());
+	}
+	
+	@Test
+	public void createNewAssignment() throws Exception {
+		MockHttpServletResponse response;
+		
+		AssignmentDTO newAss = new AssignmentDTO(3,"Homework 1", "2023-09-05", "CST 363 - Introduction to Database Systems", 31045);
+		try {
+			response = mvc.perform(MockMvcRequestBuilders.post("/assignment").accept(MediaType.APPLICATION_JSON).content(asJsonString(newAss)).contentType(MediaType.APPLICATION_JSON))
+					.andReturn().getResponse();
+		} catch (Exception e) {
+			try {
+				response = mvc.perform(MockMvcRequestBuilders.post("/assignment").accept(MediaType.APPLICATION_JSON).content(asJsonString(newAss)).contentType(MediaType.APPLICATION_JSON))
+						.andReturn().getResponse();
+			} catch (Exception e2) {
+				response = mvc.perform(MockMvcRequestBuilders.post("/assignment").accept(MediaType.APPLICATION_JSON).content(asJsonString(newAss)).contentType(MediaType.APPLICATION_JSON))
+						.andReturn().getResponse();
+			}
+		}
+		
+		assertEquals(200, response.getStatus());
+		assertEquals(3, Integer.parseInt(response.getContentAsString()));
+		
+		response = mvc.perform(MockMvcRequestBuilders.get("/assignment/3").accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+		
+		assertEquals(200, response.getStatus());
+		
+		AssignmentDTO ass = fromJsonString(response.getContentAsString(), AssignmentDTO.class);
+		assertEquals("Homework 1", ass.assignmentName());
+	}
+	
+	@Test
+	public void updateAssignment() throws Exception {
+		MockHttpServletResponse response;
+		
+		AssignmentDTO newAss = new AssignmentDTO(1,"db design", "2023-09-05", "CST 363 - Introduction to Database Systems", 31045);
+		
+		response = mvc.perform(MockMvcRequestBuilders.put("/assignment/1").accept(MediaType.APPLICATION_JSON).content(asJsonString(newAss)).contentType(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse();
+		
+		assertEquals(200, response.getStatus());
+		AssignmentDTO ass = fromJsonString(response.getContentAsString(), AssignmentDTO.class);
+		assertEquals("2023-09-05", ass.dueDate());
+	}
+	
+	@Test
+	public void deleteAssignment() throws Exception {
+		MockHttpServletResponse response;
+		
+		response = mvc.perform(MockMvcRequestBuilders.delete("/assignment/2").accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+		
+		assertEquals(200, response.getStatus());
+		assertEquals("false", response.getContentAsString());
+		
+		response = mvc.perform(MockMvcRequestBuilders.delete("/assignment/2?force=true").accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+		
+		assertEquals(200, response.getStatus());
+		assertEquals("true", response.getContentAsString());
+		
+		AssignmentDTO newAss = new AssignmentDTO(3,"Homework 1", "2023-09-05", "CST 363 - Introduction to Database Systems", 31045);
+		response = mvc.perform(MockMvcRequestBuilders.post("/assignment").accept(MediaType.APPLICATION_JSON).content(asJsonString(newAss)).contentType(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse();
+		int id = Integer.parseInt(response.getContentAsString());
+		response = mvc.perform(MockMvcRequestBuilders.delete("/assignment/" + id).accept(MediaType.APPLICATION_JSON)).andReturn().getResponse();
+		
+		assertEquals(200, response.getStatus());
+		assertEquals("true", response.getContentAsString());
 	}
 
 	private static String asJsonString(final Object obj) {
