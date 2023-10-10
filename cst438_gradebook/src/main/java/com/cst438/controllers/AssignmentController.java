@@ -61,9 +61,13 @@ public class AssignmentController {
 	// TODO create CRUD methods for Assignment
 	@GetMapping("/assignment/{id}")
 	public AssignmentDTO getAssignmentById(@PathVariable("id") int id) {
+		String instructorEmail = "dwisneski@csumb.edu";
 		Assignment as = assignmentRepository.findById(id).orElse(null);
 		if(as == null) {
 			return null;
+		}
+		if(!as.getCourse().getInstructor().equals(instructorEmail)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 		}
 		return new AssignmentDTO(as.getId(), as.getName(), as.getDueDate().toString(), as.getCourse().getTitle(), as.getCourse().getCourse_id());
 	}

@@ -6,8 +6,10 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.cst438.domain.Course;
 import com.cst438.domain.FinalGradeDTO;
@@ -47,6 +49,17 @@ public class RegistrationServiceMQ implements RegistrationService {
 		System.out.println("Gradebook has received: "+message);
 
 		//TODO  deserialize message to EnrollmentDTO and update database
+		EnrollmentDTO edto = fromJsonString(message, EnrollmentDTO.class);
+		Course c = courseRepository.findById(edto.courseId()).orElse(null);
+		if(c == null) {
+			throw new ResponseStatusException( HttpStatus.NOT_FOUND, "course not found "+edto.courseId());
+		}
+		
+		Enrollment e = new Enrollment();
+		e.setCourse(c);
+		e.setStudentEmail(edto.studentEmail());
+		e.setStudentName(edto.studentName());
+		enrollmentRepository.save(e);
 	}
 
 	/*
@@ -58,6 +71,8 @@ public class RegistrationServiceMQ implements RegistrationService {
 		System.out.println("Start sendFinalGrades "+course_id);
 
 		//TODO convert grades to JSON string and send to registration service
+		String gradesJSON = asJsonString(grades);
+		rabbitTemplate.convertAndSend(registrationQueue.getName(), gradesJSON);
 		
 	}
 	

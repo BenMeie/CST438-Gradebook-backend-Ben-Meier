@@ -135,18 +135,8 @@ public class JunitTestGradebook {
 		MockHttpServletResponse response;
 		
 		AssignmentDTO newAss = new AssignmentDTO(3,"Homework 1", "2023-09-05", "CST 363 - Introduction to Database Systems", 31045);
-		try {
-			response = mvc.perform(MockMvcRequestBuilders.post("/assignment").accept(MediaType.APPLICATION_JSON).content(asJsonString(newAss)).contentType(MediaType.APPLICATION_JSON))
+		response = mvc.perform(MockMvcRequestBuilders.post("/assignment").accept(MediaType.APPLICATION_JSON).content(asJsonString(newAss)).contentType(MediaType.APPLICATION_JSON))
 					.andReturn().getResponse();
-		} catch (Exception e) {
-			try {
-				response = mvc.perform(MockMvcRequestBuilders.post("/assignment").accept(MediaType.APPLICATION_JSON).content(asJsonString(newAss)).contentType(MediaType.APPLICATION_JSON))
-						.andReturn().getResponse();
-			} catch (Exception e2) {
-				response = mvc.perform(MockMvcRequestBuilders.post("/assignment").accept(MediaType.APPLICATION_JSON).content(asJsonString(newAss)).contentType(MediaType.APPLICATION_JSON))
-						.andReturn().getResponse();
-			}
-		}
 		
 		assertEquals(200, response.getStatus());
 		assertEquals(3, Integer.parseInt(response.getContentAsString()));
