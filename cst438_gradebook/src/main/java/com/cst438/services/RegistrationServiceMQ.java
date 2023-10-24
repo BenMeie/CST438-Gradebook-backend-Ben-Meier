@@ -72,6 +72,7 @@ public class RegistrationServiceMQ implements RegistrationService {
 
 		//TODO convert grades to JSON string and send to registration service
 		String gradesJSON = asJsonString(grades);
+		System.out.println(gradesJSON);
 		rabbitTemplate.convertAndSend(registrationQueue.getName(), gradesJSON);
 		
 	}

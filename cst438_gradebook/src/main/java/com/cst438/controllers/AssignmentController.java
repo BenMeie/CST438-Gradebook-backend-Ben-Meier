@@ -1,5 +1,6 @@
 package com.cst438.controllers;
 
+import java.security.Principal;
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import com.cst438.domain.AssignmentGradeRepository;
 import com.cst438.domain.AssignmentRepository;
 import com.cst438.domain.Course;
 import com.cst438.domain.CourseRepository;
+import com.cst438.domain.UserRepository;
 
 @RestController
 @CrossOrigin 
@@ -39,10 +41,13 @@ public class AssignmentController {
 	@Autowired
 	CourseRepository courseRepository;
 	
+	@Autowired
+	UserRepository userRepository;
+	
 	@GetMapping("/assignment")
-	public AssignmentDTO[] getAllAssignmentsForInstructor() {
+	public AssignmentDTO[] getAllAssignmentsForInstructor(Principal principal) {
 		// get all assignments for this instructor
-		String instructorEmail = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
+		String instructorEmail = userRepository.findByAlias(principal.getName()).getEmail();  // user name (should be instructor's email) 
 		List<Assignment> assignments = assignmentRepository.findByEmail(instructorEmail);
 		AssignmentDTO[] result = new AssignmentDTO[assignments.size()];
 		for (int i=0; i<assignments.size(); i++) {
@@ -60,8 +65,8 @@ public class AssignmentController {
 	
 	// TODO create CRUD methods for Assignment
 	@GetMapping("/assignment/{id}")
-	public AssignmentDTO getAssignmentById(@PathVariable("id") int id) {
-		String instructorEmail = "dwisneski@csumb.edu";
+	public AssignmentDTO getAssignmentById(Principal principal, @PathVariable("id") int id) {
+		String instructorEmail = userRepository.findByAlias(principal.getName()).getEmail();
 		Assignment as = assignmentRepository.findById(id).orElse(null);
 		if(as == null) {
 			return null;
@@ -74,7 +79,8 @@ public class AssignmentController {
 	
 	@SuppressWarnings("deprecation")
 	@PostMapping("/assignment")
-	public int newAssignment(@RequestBody AssignmentDTO as) {
+	public int newAssignment(Principal principal, @RequestBody AssignmentDTO as) {
+		String instructorEmail = userRepository.findByAlias(principal.getName()).getEmail();
 		Assignment realAs = new Assignment();
 		realAs.setName(as.assignmentName());
 		realAs.setId(as.id());
@@ -85,6 +91,9 @@ public class AssignmentController {
 		realAs.setDueDate(new Date(Date.UTC(year - 1900, month-1, day+1, 0, 0, 0)));
 		
 		Course c = courseRepository.findById(as.courseId()).orElse(null);
+		if(!c.getInstructor().equals(instructorEmail)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+		}
 		realAs.setCourse(c);
 		
 		assignmentRepository.save(realAs);
@@ -93,7 +102,8 @@ public class AssignmentController {
 	}
 	
 	@PutMapping("/assignment/{id}")
-	public AssignmentDTO updateAssignment(@PathVariable("id") Integer id, @RequestBody AssignmentDTO as) {
+	public AssignmentDTO updateAssignment(Principal principal, @PathVariable("id") Integer id, @RequestBody AssignmentDTO as) {
+		String instructorEmail = userRepository.findByAlias(principal.getName()).getEmail();
 		Assignment realAs = new Assignment();
 		realAs.setName(as.assignmentName());
 		realAs.setId(as.id());
@@ -104,6 +114,9 @@ public class AssignmentController {
 		realAs.setDueDate(new Date(Date.UTC(year - 1900, month-1, day+1, 0, 0, 0)));
 		
 		Course c = courseRepository.findById(as.courseId()).orElse(null);
+		if(!c.getInstructor().equals(instructorEmail)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+		}
 		realAs.setCourse(c);
 		
 		Assignment foundAssignment = assignmentRepository.findById(id).orElse(null);
@@ -118,10 +131,15 @@ public class AssignmentController {
 	}
 	
 	@DeleteMapping("/assignment/{id}")
-	public boolean deleteAssignment(@PathVariable("id") Integer id, @RequestParam("force") Optional<String> force) {
+	public boolean deleteAssignment(Principal principal, @PathVariable("id") Integer id, @RequestParam("force") Optional<String> force) {
+		String instructorEmail = userRepository.findByAlias(principal.getName()).getEmail();
 		Assignment as = assignmentRepository.findById(id).orElse(null);
 		if(as == null) 
 			return false;
+		
+		if(!as.getCourse().getInstructor().equals(instructorEmail)) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+		}
 		
 		AssignmentGrade[] grades = assignmentGradeRepository.findByAssignmentId(as.getId());
 		if(grades.length > 0 && !force.isPresent()) {

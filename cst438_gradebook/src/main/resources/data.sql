@@ -38,3 +38,9 @@ insert into assignment_grade (score, assignment_id, enrollment_id) values
 (76, 4, 5),
 (91, 4, 6)
 ;
+
+insert into user_table
+(alias, email, password, role) values 
+('student', 'student@csumb.edu', '$2a$10$NVM0n8ElaRgg7zWO1CxUdei7vWoPg91Lz2aYavh9.f9q0e4bRadue','USER'),
+('instructor', 'dwisneski@csumb.edu', '$2a$10$8cjz47bjbR4Mn8GMg9IZx.vyjhLXR/SKKMSZ9.mP9vpMu0ssKi8GW' , 'ADMIN');
+
